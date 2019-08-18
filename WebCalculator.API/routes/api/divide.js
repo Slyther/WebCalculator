@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-router.post('/', (req, res) => {
+router.get('/', (req, res) => {
     let { num1, num2 } = req.body;
     let result = {
         operation: `${num1} / ${num2}`

@@ -15,3 +15,5 @@ routes.forEach(route => {
 app.listen(PORT, () => {
     console.log(`Express started on ${PORT}`)
 });
+
+module.exports = app;
