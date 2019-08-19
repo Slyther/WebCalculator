@@ -10,13 +10,14 @@ class App extends Component {
       result: 0,
       isNum2: false,
       isCompletelyDisabled: false,
+      isDotDisabled: false,
       operator: '',
       topLabelText: ''
     };
   }
 
   handleChnge = (e, input) => {
-    let { isNum2, num1, num2, operator, result, isCompletelyDisabled } = this.state;
+    let { isNum2, num1, num2, operator, result, isCompletelyDisabled, isDotDisabled } = this.state;
     
     switch(input) {
       case 'exp':
@@ -26,14 +27,20 @@ class App extends Component {
       case 'substract':
         isNum2 = true;
         operator = input;
+        isDotDisabled = false;
+        if(num1.length === 0)
+          num1 = '0';
         break;
       case 'sqrt':
+        if(num1.length === 0)
+          num1 = '0';
         isCompletelyDisabled = true;
         operator = input;
         break;
       case 'clear':
         isNum2 = false;
         isCompletelyDisabled = false;
+        isDotDisabled = false;
         num1 = '';
         num2 = '';
         result = 0;
@@ -52,6 +59,8 @@ class App extends Component {
         }
         break;
       default:
+        if(input === '.')
+          isDotDisabled = true;
         if(isNum2) {
           num2 += input;
         } else {
@@ -59,7 +68,7 @@ class App extends Component {
         }
         break;
     }
-    this.setState({ isNum2, isCompletelyDisabled, num1, num2, operator, result }, () => this.updateLabels());
+    this.setState({isNum2, isCompletelyDisabled, num1, num2, operator, result, isDotDisabled }, () => this.updateLabels());
   };
 
   submitEntry = () => {
@@ -77,9 +86,25 @@ class App extends Component {
     }).then(response => response.json())
     .then(response => {
       if(typeof response.errorMsg !== 'undefined'){
-        this.setState({result: response.errorMsg});
+        this.setState({
+          result: response.errorMsg, 
+          isNum2: false, 
+          isCompletelyDisabled: false, 
+          num1: '', 
+          num2: '', 
+          operator: '', 
+          isDotDisabled: false
+        });
       } else {
-        this.setState({result: response.result});
+        this.setState({
+          result: response.result,
+          isNum2: false, 
+          isCompletelyDisabled: false, 
+          num1: `${response.result}`, 
+          num2: '', 
+          operator: '', 
+          isDotDisabled: false
+        });
       }
     });
   };
@@ -99,10 +124,10 @@ class App extends Component {
         topLabelText = `${num1} ^ ${num2}`
         break;
       case 'divide':
-        topLabelText = `${num1} / ${num2}`
+        topLabelText = `${num1} ÷ ${num2}`
         break;
       case 'multiply':
-        topLabelText = `${num1} * ${num2}`
+        topLabelText = `${num1} ⨯ ${num2}`
         break;
       case 'add':
         topLabelText = `${num1} + ${num2}`
@@ -119,40 +144,40 @@ class App extends Component {
   }
 
   render() {
-    const { result, topLabelText, isNum2, isCompletelyDisabled } = this.state;
+    const { result, topLabelText, isNum2, isCompletelyDisabled, isDotDisabled } = this.state;
     const JSX = (
       <div className="calculator-container">
         <p className="top-label">{topLabelText}</p>
         <h3 className="main-label">{result}</h3>
         <div className="buttons-grid container">
           <div className="row">
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'sqrt')}>√</div>
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'exp')}>x<sup>2</sup></div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'sqrt')}>√</div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'exp')}>x<sup>y</sup></div>
             <div className="col-xs-3 calcButton"  onClick={(e) => this.handleChnge(e, 'clear')}>C</div>
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'divide')}>÷</div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'divide')}>÷</div>
           </div>
           <div className="row">
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '7')}>7</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '8')}>8</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '9')}>9</div>
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'multiply')}>⨯</div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'multiply')}>⨯</div>
           </div>
           <div className="row">
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '4')}>4</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '5')}>5</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '6')}>6</div>
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'substract')}>-</div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'substract')}>-</div>
           </div>
           <div className="row">
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '1')}>1</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '2')}>2</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '3')}>3</div>
-            <div className={`col-xs-3 calcButton ${isNum2 ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'add')}>+</div>
+            <div className={`col-xs-3 calcButton ${isNum2 || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'add')}>+</div>
           </div>
           <div className="row">
-            <div className="col-xs-3 calcButton"  onClick={(e) => this.handleChnge(e, 'invert')}>±</div>
+            <div className={`col-xs-3 calcButton ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, 'invert')}>±</div>
             <div className={`col-xs-3 calcButton number ${isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '0')}>0</div>
-            <div className="col-xs-3 calcButton"  onClick={(e) => this.handleChnge(e, '.')}>.</div>
+            <div className={`col-xs-3 calcButton ${isDotDisabled || isCompletelyDisabled ? 'disabled' : ''}`}  onClick={(e) => this.handleChnge(e, '.')}>.</div>
             <div className="col-xs-3 calcButton"  onClick={(e) => this.handleChnge(e, 'submit')}>=</div>
           </div>
         </div>
